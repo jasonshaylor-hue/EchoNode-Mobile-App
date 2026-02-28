@@ -15,6 +15,7 @@ class MockSpeechRecognition {
   onend: any = null
   start = vi.fn()
   stop = vi.fn()
+  abort = vi.fn()
 }
 
 describe('VoiceCapture', () => {

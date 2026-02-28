@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { groq, FAST_MODEL } from '@/lib/groq'
 import type { ThoughtCategory } from '@/types/thought'
 
+// z.ZodType<any> is required here — TypeScript cannot infer circular types from z.lazy()
+// The runtime shape is correct; callers should use the ProjectNode interface from @/types/thought
 const ProjectNodeSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
     title: z.string(),

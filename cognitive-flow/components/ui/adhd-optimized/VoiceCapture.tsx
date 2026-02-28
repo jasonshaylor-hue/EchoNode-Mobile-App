@@ -33,6 +33,10 @@ export default function VoiceCapture({ onCapture, isProcessing }: VoiceCapturePr
     recognition.onerror = () => setIsListening(false)
     recognition.onend = () => setIsListening(false)
     recognitionRef.current = recognition
+    return () => {
+      recognition.abort()
+      recognitionRef.current = null
+    }
   }, [onCapture])
 
   const handleMicPress = useCallback(() => {

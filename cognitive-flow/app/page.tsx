@@ -40,8 +40,8 @@ export default function HomePage() {
       const thought: CapturedThought = await res.json()
       saveThought(thought)
       setThoughts(prev => [thought, ...prev])
-    } catch (err: any) {
-      setError(err.message ?? 'Something went wrong. Your text is saved — please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Your text is saved — please try again.')
     } finally {
       setIsProcessing(false)
     }

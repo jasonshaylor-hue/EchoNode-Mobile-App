@@ -10,8 +10,11 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { rawText, sessionId } = body
 
-  if (!rawText || typeof rawText !== 'string') {
-    return NextResponse.json({ error: 'rawText is required' }, { status: 400 })
+  if (!rawText || typeof rawText !== 'string' || rawText.length > 2000) {
+    return NextResponse.json(
+      { error: 'rawText is required and must be under 2000 characters' },
+      { status: 400 }
+    )
   }
 
   try {
