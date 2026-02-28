@@ -2,7 +2,8 @@ import { supabase } from '@/lib/supabase'
 import type { CapturedThought } from '@/types/thought'
 
 export async function persistThought(thought: CapturedThought): Promise<void> {
-  const { error } = await supabase.from('thoughts').insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from('thoughts') as any).insert({
     id: thought.id,
     session_id: thought.sessionId,
     raw_text: thought.rawText,
