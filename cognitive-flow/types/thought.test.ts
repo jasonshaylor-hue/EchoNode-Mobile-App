@@ -25,5 +25,7 @@ describe('CapturedThought types', () => {
     expectTypeOf<CapturedThought>().toHaveProperty('category')
     expectTypeOf<CapturedThought>().toHaveProperty('hierarchy')
     expectTypeOf<CapturedThought>().toHaveProperty('sessionId')
+    expectTypeOf<CapturedThought>().toHaveProperty('intent')
+    expectTypeOf<CapturedThought>().toHaveProperty('createdAt')
   })
 })
