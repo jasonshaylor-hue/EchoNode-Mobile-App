@@ -1,65 +1,92 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import VoiceCapture from '@/components/ui/adhd-optimized/VoiceCapture'
+import ThoughtCard from '@/components/ui/adhd-optimized/ThoughtCard'
+import { saveThought, getThoughts } from '@/memory/session'
+import type { CapturedThought } from '@/types/thought'
+
+export default function HomePage() {
+  const [thoughts, setThoughts] = useState<CapturedThought[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setThoughts(getThoughts())
+  }, [])
+
+  const handleCapture = useCallback(async (rawText: string) => {
+    setIsProcessing(true)
+    setError(null)
+    const sessionId = sessionStorage.getItem('cf_session_id') ?? (() => {
+      const id = crypto.randomUUID()
+      sessionStorage.setItem('cf_session_id', id)
+      return id
+    })()
+
+    try {
+      const res = await fetch('/api/process-thought', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawText, sessionId }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error ?? 'Processing failed')
+      }
+
+      const thought: CapturedThought = await res.json()
+      saveThought(thought)
+      setThoughts(prev => [thought, ...prev])
+    } catch (err: any) {
+      setError(err.message ?? 'Something went wrong. Your text is saved — please try again.')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="flex flex-col h-screen pt-[env(safe-area-inset-top)]">
+      {/* Header */}
+      <header className="px-4 py-3 border-b border-border flex-shrink-0">
+        <h1 className="text-xl font-bold text-primary">Cognitive Flow</h1>
+      </header>
+
+      {/* Thoughts list */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+        {thoughts.length === 0 && !isProcessing && (
+          <p className="text-muted text-sm text-center mt-8">
+            Your captured thoughts will appear here
           </p>
+        )}
+        <AnimatePresence>
+          {thoughts.map((thought) => (
+            <motion.div
+              key={thought.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              <ThoughtCard thought={thought} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="px-4 py-2 bg-surface border-t border-border">
+          <p className="text-sm text-muted">{error}</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      )}
+
+      {/* Voice capture — thumb zone */}
+      <div className="flex-shrink-0 border-t border-border py-4">
+        <VoiceCapture onCapture={handleCapture} isProcessing={isProcessing} />
+      </div>
+    </main>
+  )
 }
