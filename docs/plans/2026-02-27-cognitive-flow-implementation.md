@@ -6,7 +6,7 @@
 
 **Architecture:** Three sequential agents (capture → classify → organize) orchestrated by a single Next.js API route, with sessionStorage as L1 cache and Supabase as L2 persistence. Web Speech API handles voice input; Vercel AI SDK calls Groq (Llama 3.1 8B) for all AI logic.
 
-**Tech Stack:** Next.js 15 (App Router), TypeScript, Tailwind CSS, Framer Motion, Vercel AI SDK, Groq API, Supabase (PostgreSQL + pgvector), Vitest, React Testing Library
+**Tech Stack:** Next.js 16 (App Router), TypeScript, Tailwind CSS, Framer Motion, Vercel AI SDK, Groq API, Supabase (PostgreSQL + pgvector), Vitest, React Testing Library
 
 **Design Doc:** `docs/plans/2026-02-27-cognitive-flow-design.md`
 
@@ -988,48 +988,55 @@ git commit -m "feat: implement process-thought orchestrator API route"
 ## Task 12: Tailwind Design Tokens
 
 **Files:**
-- Modify: `tailwind.config.ts`
+- Modify: `app/globals.css`
+- Delete: `tailwind.config.ts` (Tailwind v4 uses CSS-based config, not JS config)
 
-**Step 1: Read the current config**
+**Step 1: Check if tailwind.config.ts exists**
 
-Open `tailwind.config.ts` and replace its contents with:
+If `tailwind.config.ts` exists, delete it — Tailwind v4 does not use it.
 
-```typescript
-import type { Config } from 'tailwindcss'
+**Step 2: Tailwind v4 uses @theme in CSS**
 
-const config: Config = {
-  content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
-  theme: {
-    extend: {
-      colors: {
-        background: '#0F0F0F',
-        surface: '#1A1A1A',
-        border: '#2A2A2A',
-        primary: '#E8E8E8',
-        muted: '#6B6B6B',
-        accent: '#4A7FA5',
-        success: '#4A8C6F',
-      },
-      fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
+Replace the entire contents of `app/globals.css` with:
+
+```css
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0F0F0F;
+  --color-surface: #1A1A1A;
+  --color-border: #2A2A2A;
+  --color-primary: #E8E8E8;
+  --color-muted: #6B6B6B;
+  --color-accent: #4A7FA5;
+  --color-success: #4A8C6F;
+
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-export default config
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background-color: #0F0F0F;
+  color: #E8E8E8;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
 ```
 
-**Step 2: Commit**
+Note: In Tailwind v4, `bg-background`, `text-primary`, `border-border`, etc. will be available as utility classes automatically from the @theme block. `safe-top`/`safe-bottom` safe area classes are handled inline via Tailwind's arbitrary value syntax `pb-[env(safe-area-inset-bottom)]`.
+
+**Step 3: Commit**
 
 ```bash
-git add tailwind.config.ts
-git commit -m "feat: add low-dopamine design tokens to Tailwind config"
+git add app/globals.css
+git commit -m "feat: add low-dopamine design tokens to Tailwind v4 CSS theme"
 ```
 
 ---
@@ -1335,9 +1342,18 @@ git commit -m "feat: implement ThoughtCard with category badge and hierarchy tre
 
 Replace `app/globals.css` with:
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0F0F0F;
+  --color-surface: #1A1A1A;
+  --color-border: #2A2A2A;
+  --color-primary: #E8E8E8;
+  --color-muted: #6B6B6B;
+  --color-accent: #4A7FA5;
+  --color-success: #4A8C6F;
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
 :root {
   color-scheme: dark;
@@ -1353,10 +1369,6 @@ html, body {
 * {
   -webkit-tap-highlight-color: transparent;
 }
-
-/* Safe area support */
-.safe-top { padding-top: env(safe-area-inset-top); }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 ```
 
 **Step 2: Update app/layout.tsx**
