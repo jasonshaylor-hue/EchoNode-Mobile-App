@@ -17,16 +17,18 @@ export async function upsertTasks(
       .single()
 
     if (existing) {
-      await (supabase.from('tasks') as any)
+      const { error: updateError } = await (supabase.from('tasks') as any)
         .update({ mention_count: existing.mention_count + 1 })
         .eq('id', existing.id)
+      if (updateError) console.error('[supabase] update task mention_count failed:', updateError.message)
     } else {
-      await (supabase.from('tasks') as any).insert({
+      const { error: insertError } = await (supabase.from('tasks') as any).insert({
         session_id: sessionId,
         thought_id: thoughtId,
         title: task.title,
         priority: task.priority,
       })
+      if (insertError) console.error('[supabase] insert task failed:', insertError.message)
     }
   }
 }
@@ -78,11 +80,12 @@ export async function setDailyFocusTasks(
   date: string,
   taskIds: string[]
 ): Promise<void> {
-  await (supabase.from('daily_focus') as any).upsert({
+  const { error } = await (supabase.from('daily_focus') as any).upsert({
     session_id: sessionId,
     focus_date: date,
     task_ids: taskIds,
   })
+  if (error) console.error('[supabase] upsert daily_focus failed:', error.message)
 }
 
 function dbToTask(row: any): Task {

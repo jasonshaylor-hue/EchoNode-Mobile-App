@@ -45,6 +45,13 @@ describe('upsertTasks', () => {
     await upsertTasks([{ title: 'New task', priority: 'high' }], 'sess1', 'th1')
     expect(mockInsert).toHaveBeenCalled()
   })
+
+  it('increments mention_count when matching task found', async () => {
+    setupChain({ data: { id: 'existing-id', mention_count: 2 }, error: null })
+    const { upsertTasks } = await import('@/memory/tasks')
+    await upsertTasks([{ title: 'Existing task', priority: 'medium' }], 'sess1', 'th1')
+    expect(mockUpdate).toHaveBeenCalledWith({ mention_count: 3 })
+  })
 })
 
 describe('getOpenTasks', () => {
