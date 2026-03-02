@@ -10,7 +10,7 @@ import { generateText } from 'ai'
 import { nextTaskAgent } from '@/agents/next-task-agent'
 import type { Task } from '@/types/thought'
 
-const mockTask = (overrides = {}): Task => ({
+const mockTask = (overrides: Partial<Task> = {}): Task => ({
   id: 'task-1',
   sessionId: 'sess',
   thoughtId: 'th1',

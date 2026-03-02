@@ -20,8 +20,15 @@ Format: {"index": <1-based task number>, "rationale": "one sentence why this tas
     prompt: `Tasks:\n${taskList}`,
   })
 
-  const json = JSON.parse(text.trim().replace(/^```json\n?|```$/g, ''))
-  const picked = tasks[json.index - 1]
+  let json: { index: number; rationale: string }
+  try {
+    json = JSON.parse(text.trim().replace(/^```json\n?|```$/g, ''))
+  } catch {
+    return { task: null, rationale: 'Could not determine best task.' }
+  }
+  const index = typeof json.index === 'number' ? json.index : Number(json.index)
+  if (!Number.isFinite(index)) return { task: null, rationale: 'Could not determine best task.' }
+  const picked = tasks[index - 1]
 
   if (!picked) return { task: null, rationale: 'Could not determine best task.' }
 
