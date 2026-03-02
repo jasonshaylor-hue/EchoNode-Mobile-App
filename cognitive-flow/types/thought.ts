@@ -17,3 +17,20 @@ export interface CapturedThought {
   createdAt: string
   sessionId: string
 }
+
+export interface Task {
+  id: string
+  sessionId: string
+  thoughtId: string
+  title: string
+  priority: 'high' | 'medium' | 'low'
+  status: 'open' | 'done'
+  mentionCount: number
+  createdAt: string
+  completedAt?: string
+}
+
+export interface NextTaskResult {
+  task: Task | null
+  rationale: string
+}

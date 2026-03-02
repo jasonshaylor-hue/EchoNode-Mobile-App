@@ -1,5 +1,5 @@
-import { describe, it, expectTypeOf } from 'vitest'
-import type { CapturedThought, ProjectNode, ThoughtCategory } from './thought'
+import { describe, it, expect, expectTypeOf } from 'vitest'
+import type { CapturedThought, NextTaskResult, ProjectNode, Task, ThoughtCategory } from './thought'
 
 describe('CapturedThought types', () => {
   it('ThoughtCategory is a union of three strings', () => {
@@ -27,5 +27,25 @@ describe('CapturedThought types', () => {
     expectTypeOf<CapturedThought>().toHaveProperty('sessionId')
     expectTypeOf<CapturedThought>().toHaveProperty('intent')
     expectTypeOf<CapturedThought>().toHaveProperty('createdAt')
+  })
+
+  it('Task has required fields', () => {
+    const task: Task = {
+      id: 'abc',
+      sessionId: 'sess',
+      thoughtId: 'th1',
+      title: 'Write tests',
+      priority: 'high',
+      status: 'open',
+      mentionCount: 1,
+      createdAt: new Date().toISOString(),
+    }
+    expect(task.status).toBe('open')
+    expect(task.completedAt).toBeUndefined()
+  })
+
+  it('NextTaskResult allows null task', () => {
+    const result: NextTaskResult = { task: null, rationale: 'No tasks.' }
+    expect(result.task).toBeNull()
   })
 })
