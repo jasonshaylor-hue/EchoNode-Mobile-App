@@ -23,6 +23,8 @@ vi.mock('@/memory/supabase', () => ({
 }))
 
 vi.mock('uuid', () => ({ v4: vi.fn().mockReturnValue('mock-uuid') }))
+vi.mock('@/lib/extract-tasks', () => ({ extractTasks: vi.fn().mockReturnValue([]) }))
+vi.mock('@/memory/tasks', () => ({ upsertTasks: vi.fn().mockResolvedValue(undefined) }))
 
 import { POST } from './route'
 

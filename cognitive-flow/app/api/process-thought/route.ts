@@ -5,6 +5,8 @@ import { classifyAgent } from '@/agents/classify-agent'
 import { organizeAgent } from '@/agents/organize-agent'
 import { persistThought } from '@/memory/supabase'
 import type { CapturedThought } from '@/types/thought'
+import { extractTasks } from '@/lib/extract-tasks'
+import { upsertTasks } from '@/memory/tasks'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -35,6 +37,7 @@ export async function POST(req: NextRequest) {
 
     // Fire-and-forget — don't block response on Supabase
     persistThought(thought).catch(() => {})
+    upsertTasks(extractTasks(thought.hierarchy), thought.sessionId, thought.id).catch(() => {})
 
     return NextResponse.json(thought)
   } catch (err) {
