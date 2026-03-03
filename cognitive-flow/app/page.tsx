@@ -52,7 +52,7 @@ export default function HomePage() {
   }, [])
 
   return (
-    <main className="flex flex-col h-screen pt-[env(safe-area-inset-top)]">
+    <main className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
       {/* Header */}
       <header className="px-4 py-3 border-b border-border flex-shrink-0">
         <h1 className="text-xl font-bold text-primary">Cognitive Flow</h1>
