@@ -20,4 +20,10 @@ describe('TabBar', () => {
     const captureLink = screen.getByText('Capture').closest('a')
     expect(captureLink).toHaveAttribute('aria-current', 'page')
   })
+
+  it('does not mark inactive tab with aria-current', () => {
+    render(<TabBar />)
+    const focusLink = screen.getByText('Focus').closest('a')
+    expect(focusLink).not.toHaveAttribute('aria-current')
+  })
 })

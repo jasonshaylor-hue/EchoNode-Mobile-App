@@ -11,8 +11,7 @@ export default function TabBar() {
   const pathname = usePathname()
   return (
     <nav
-      className="flex-shrink-0 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]"
-      style={{ minHeight: '49px' }}
+      className="flex-shrink-0 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] min-h-[49px]"
       aria-label="Main navigation"
     >
       {TABS.map(tab => {
