@@ -37,7 +37,7 @@ export default function FocusPage() {
   const handleComplete = useCallback(async (taskId: string) => {
     setFocusTasks(prev => prev.filter(t => t.id !== taskId))
     setAllTasks(prev => prev.filter(t => t.id !== taskId))
-    if (nextTaskResult?.task?.id === taskId) setNextTaskResult(null)
+    setNextTaskResult(prev => prev?.task?.id === taskId ? null : prev)
 
     try {
       const res = await fetch('/api/complete-task', {
@@ -49,7 +49,7 @@ export default function FocusPage() {
     } catch {
       setError("Couldn't save — tap to retry")
     }
-  }, [nextTaskResult])
+  }, [])
 
   const handleNextTask = useCallback(async () => {
     setIsLoadingNext(true)
