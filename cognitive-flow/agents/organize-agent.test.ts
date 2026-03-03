@@ -11,14 +11,14 @@ const mockHierarchy = vi.hoisted(() => ({
 }))
 
 vi.mock('ai', () => ({
-  generateObject: vi.fn().mockResolvedValue({
-    object: { hierarchy: mockHierarchy }
-  })
+  generateText: vi.fn().mockResolvedValue({
+    text: '{"hierarchy": {"title": "Project Kickoff", "type": "project", "priority": "high", "children": [{"title": "Schedule meeting", "type": "task", "priority": "high"}, {"title": "Send invites", "type": "subtask", "priority": "medium"}]}}',
+  }),
 }))
 
 vi.mock('@/lib/groq', () => ({
   groq: vi.fn().mockReturnValue('mocked-groq-model'),
-  FAST_MODEL: 'llama-3.1-8b-instant',
+  FAST_MODEL: 'llama-3.3-70b-versatile',
 }))
 
 import { organizeAgent } from './organize-agent'

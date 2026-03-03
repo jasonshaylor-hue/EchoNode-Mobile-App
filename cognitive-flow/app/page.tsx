@@ -20,7 +20,11 @@ export default function HomePage() {
     setIsProcessing(true)
     setError(null)
     const sessionId = sessionStorage.getItem('cf_session_id') ?? (() => {
-      const id = crypto.randomUUID()
+      const id = crypto.randomUUID?.() ??
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = Math.random() * 16 | 0
+          return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
+        })
       sessionStorage.setItem('cf_session_id', id)
       return id
     })()

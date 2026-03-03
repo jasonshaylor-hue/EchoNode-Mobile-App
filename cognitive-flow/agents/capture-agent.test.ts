@@ -2,17 +2,14 @@ import { describe, it, expect, vi } from 'vitest'
 
 // Mock the AI SDK before importing the agent
 vi.mock('ai', () => ({
-  generateObject: vi.fn().mockResolvedValue({
-    object: {
-      cleanedText: 'Schedule team meeting for project kickoff',
-      intent: 'User wants to organize a kickoff meeting',
-    }
-  })
+  generateText: vi.fn().mockResolvedValue({
+    text: '{"cleanedText": "Schedule team meeting for project kickoff", "intent": "User wants to organize a kickoff meeting"}',
+  }),
 }))
 
 vi.mock('@/lib/groq', () => ({
   groq: vi.fn().mockReturnValue('mocked-groq-model'),
-  FAST_MODEL: 'llama-3.1-8b-instant',
+  FAST_MODEL: 'llama-3.3-70b-versatile',
 }))
 
 import { captureAgent } from './capture-agent'
