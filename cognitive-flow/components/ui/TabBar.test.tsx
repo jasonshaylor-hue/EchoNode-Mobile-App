@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import TabBar from './TabBar'
 
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
@@ -12,20 +13,20 @@ vi.mock('next/link', () => ({
 describe('TabBar', () => {
   it('renders all three tab labels', () => {
     render(<TabBar />)
-    expect(screen.getByText('Capture')).toBeTruthy()
-    expect(screen.getByText('Focus')).toBeTruthy()
-    expect(screen.getByText('Settings')).toBeTruthy()
+    expect(screen.getByText('Capture')).toBeInTheDocument()
+    expect(screen.getByText('Focus')).toBeInTheDocument()
+    expect(screen.getByText('Settings')).toBeInTheDocument()
   })
 
   it('marks active tab with aria-current="page"', () => {
     render(<TabBar />)
     const captureLink = screen.getByText('Capture').closest('a')
-    expect(captureLink?.getAttribute('aria-current')).toBe('page')
+    expect(captureLink).toHaveAttribute('aria-current', 'page')
   })
 
   it('does not mark inactive tabs with aria-current', () => {
     render(<TabBar />)
     const focusLink = screen.getByText('Focus').closest('a')
-    expect(focusLink?.getAttribute('aria-current')).toBeNull()
+    expect(focusLink).not.toHaveAttribute('aria-current')
   })
 })
