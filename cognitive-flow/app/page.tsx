@@ -8,6 +8,7 @@ import { saveThought, getThoughts } from '@/memory/session'
 import type { CapturedThought } from '@/types/thought'
 
 const listVariants = {
+  hidden: {},
   show: { transition: { staggerChildren: 0.06 } },
 }
 
@@ -59,10 +60,9 @@ export default function HomePage() {
     }
   }, [])
 
-  const filtered = search.trim()
-    ? thoughts.filter(t =>
-        t.cleanedText.toLowerCase().includes(search.toLowerCase())
-      )
+  const lowerSearch = search.trim().toLowerCase()
+  const filtered = lowerSearch
+    ? thoughts.filter(t => t.cleanedText.toLowerCase().includes(lowerSearch))
     : thoughts
 
   return (
