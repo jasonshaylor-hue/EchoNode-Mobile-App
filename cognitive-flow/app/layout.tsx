@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import TabBar from '@/components/ui/TabBar'
+import SideNav from '@/components/ui/SideNav'
 import { ThemeProvider } from '@/lib/theme'
 
 export const metadata: Metadata = {
@@ -20,9 +21,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-background text-primary h-dvh flex flex-col md:flex-row overflow-hidden">
         <ThemeProvider>
-          <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Sidebar — desktop only */}
+          <SideNav />
+
+          {/* Main content column */}
+          <div className="flex-1 flex flex-col overflow-hidden min-w-0">
             {children}
           </div>
+
+          {/* Tab bar — mobile only, hidden md+ */}
           <TabBar />
         </ThemeProvider>
       </body>
