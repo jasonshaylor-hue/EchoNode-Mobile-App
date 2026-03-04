@@ -3,7 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react'
 
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({ children, whileHover, whileTap, whileFocus, initial, animate, exit, transition, variants, ...props }: any) =>
+      <div {...props}>{children}</div>,
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
