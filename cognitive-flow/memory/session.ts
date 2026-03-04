@@ -23,3 +23,12 @@ export function clearThoughts(): void {
   if (typeof window === 'undefined') return
   sessionStorage.removeItem(SESSION_KEY)
 }
+
+export function updateThought(id: string, updates: Partial<CapturedThought>): void {
+  if (typeof window === 'undefined') return
+  const thoughts = getThoughts()
+  const idx = thoughts.findIndex(t => t.id === id)
+  if (idx === -1) return
+  thoughts[idx] = { ...thoughts[idx], ...updates }
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(thoughts))
+}

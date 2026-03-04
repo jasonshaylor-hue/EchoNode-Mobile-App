@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import GlassCard from '@/components/ui/GlassCard'
+import TagEditor from '@/components/ui/adhd-optimized/TagEditor'
 import type { CapturedThought, ProjectNode } from '@/types/thought'
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -46,6 +47,7 @@ export default function ThoughtCard({ thought }: ThoughtCardProps) {
         <div className="mt-1">
           <NodeTree node={thought.hierarchy} />
         </div>
+        <TagEditor thoughtId={thought.id} initialTags={thought.tags ?? []} />
       </GlassCard>
     </motion.div>
   )

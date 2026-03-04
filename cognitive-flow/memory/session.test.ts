@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { saveThought, getThoughts, clearThoughts } from './session'
+import { saveThought, getThoughts, clearThoughts, updateThought } from './session'
 import type { CapturedThought } from '@/types/thought'
 
 const mockThought: CapturedThought = {
@@ -42,5 +42,34 @@ describe('session storage', () => {
     saveThought(mockThought)
     clearThoughts()
     expect(getThoughts()).toEqual([])
+  })
+})
+
+const makeThought = (id: string): CapturedThought => ({
+  id,
+  rawText: 'raw',
+  cleanedText: 'clean',
+  category: 'Task',
+  intent: 'test',
+  hierarchy: { title: 'T', type: 'project', priority: 'low' },
+  createdAt: new Date().toISOString(),
+  sessionId: 's1',
+})
+
+describe('updateThought', () => {
+  beforeEach(() => sessionStorage.clear())
+
+  it('updates tags on an existing thought', () => {
+    const t = makeThought('abc')
+    saveThought(t)
+    updateThought('abc', { tags: ['important', 'work'] })
+    const stored = getThoughts()
+    expect(stored[0].tags).toEqual(['important', 'work'])
+  })
+
+  it('does nothing when id not found', () => {
+    saveThought(makeThought('abc'))
+    updateThought('nonexistent', { tags: ['x'] })
+    expect(getThoughts()[0].tags).toBeUndefined()
   })
 })

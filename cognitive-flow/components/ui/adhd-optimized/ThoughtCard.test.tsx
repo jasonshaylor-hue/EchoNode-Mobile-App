@@ -9,6 +9,10 @@ vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
 
+vi.mock('@/memory/session', () => ({
+  updateThought: vi.fn(),
+}))
+
 import ThoughtCard from './ThoughtCard'
 import type { CapturedThought } from '@/types/thought'
 

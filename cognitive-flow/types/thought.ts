@@ -16,6 +16,7 @@ export interface CapturedThought {
   hierarchy: ProjectNode
   createdAt: string
   sessionId: string
+  tags?: string[]
 }
 
 export interface Task {
