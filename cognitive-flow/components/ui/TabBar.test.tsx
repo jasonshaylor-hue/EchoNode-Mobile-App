@@ -1,29 +1,31 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import TabBar from './TabBar'
 
-vi.mock('next/navigation', () => ({ usePathname: vi.fn().mockReturnValue('/') }))
+vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 vi.mock('next/link', () => ({
-  default: ({ href, children, ...props }: any) => <a href={href} {...props}>{children}</a>,
+  default: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>{children}</a>
+  ),
 }))
 
-import TabBar from '@/components/ui/TabBar'
-
 describe('TabBar', () => {
-  it('renders both tabs', () => {
+  it('renders all three tab labels', () => {
     render(<TabBar />)
-    expect(screen.getByText('Capture')).toBeInTheDocument()
-    expect(screen.getByText('Focus')).toBeInTheDocument()
+    expect(screen.getByText('Capture')).toBeTruthy()
+    expect(screen.getByText('Focus')).toBeTruthy()
+    expect(screen.getByText('Settings')).toBeTruthy()
   })
 
-  it('marks active tab with aria-current', () => {
+  it('marks active tab with aria-current="page"', () => {
     render(<TabBar />)
     const captureLink = screen.getByText('Capture').closest('a')
-    expect(captureLink).toHaveAttribute('aria-current', 'page')
+    expect(captureLink?.getAttribute('aria-current')).toBe('page')
   })
 
-  it('does not mark inactive tab with aria-current', () => {
+  it('does not mark inactive tabs with aria-current', () => {
     render(<TabBar />)
     const focusLink = screen.getByText('Focus').closest('a')
-    expect(focusLink).not.toHaveAttribute('aria-current')
+    expect(focusLink?.getAttribute('aria-current')).toBeNull()
   })
 })
