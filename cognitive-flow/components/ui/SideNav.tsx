@@ -15,7 +15,7 @@ export default function SideNav() {
   return (
     <aside
       className="hidden md:flex w-56 flex-shrink-0 flex-col border-r border-border bg-surface pt-6 pb-[env(safe-area-inset-bottom)]"
-      aria-label="Main navigation"
+      aria-label="Sidebar navigation"
     >
       <div className="px-4 mb-8">
         <h1 className="text-base font-bold text-primary">Cognitive Flow</h1>
@@ -32,7 +32,7 @@ export default function SideNav() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 ${
                 isActive
                   ? 'bg-accent/10 text-accent'
-                  : 'text-muted hover:text-primary hover:bg-surface'
+                  : 'text-muted hover:text-primary hover:bg-accent/5'
               }`}
               aria-current={isActive ? 'page' : undefined}
             >
