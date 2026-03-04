@@ -1,8 +1,12 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import GlassCard from '@/components/ui/GlassCard'
 import type { CapturedThought, ProjectNode } from '@/types/thought'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Task: 'text-accent border-accent',
-  Idea: 'text-success border-success',
+  Task:      'text-accent border-accent',
+  Idea:      'text-success border-success',
   Reference: 'text-muted border-muted',
 }
 
@@ -25,18 +29,24 @@ interface ThoughtCardProps {
 export default function ThoughtCard({ thought }: ThoughtCardProps) {
   const categoryStyle = CATEGORY_COLORS[thought.category] ?? 'text-muted border-muted'
   return (
-    <div className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <span className={`text-xs font-medium border rounded-full px-2 py-0.5 ${categoryStyle}`}>
-          {thought.category}
-        </span>
-        <p className="text-primary text-sm font-medium truncate flex-1">
-          {thought.cleanedText}
-        </p>
-      </div>
-      <div className="mt-1">
-        <NodeTree node={thought.hierarchy} />
-      </div>
-    </div>
+    <motion.div
+      whileHover={{ scale: 1.015 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+    >
+      <GlassCard className="p-4 flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-medium border rounded-full px-2 py-0.5 flex-shrink-0 ${categoryStyle}`}>
+            {thought.category}
+          </span>
+          <p className="text-primary text-sm font-medium truncate flex-1">
+            {thought.cleanedText}
+          </p>
+        </div>
+        <div className="mt-1">
+          <NodeTree node={thought.hierarchy} />
+        </div>
+      </GlassCard>
+    </motion.div>
   )
 }
