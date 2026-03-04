@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, KeyboardEvent } from 'react'
+import { useState, useEffect, KeyboardEvent } from 'react'
 import { updateThought } from '@/memory/session'
 
 interface TagEditorProps {
@@ -11,6 +11,8 @@ interface TagEditorProps {
 export default function TagEditor({ thoughtId, initialTags }: TagEditorProps) {
   const [tags, setTags] = useState<string[]>(initialTags)
   const [input, setValue] = useState('')
+
+  useEffect(() => { setTags(initialTags) }, [initialTags])
 
   const addTag = () => {
     const tag = input.trim().toLowerCase()

@@ -24,7 +24,9 @@ export function clearThoughts(): void {
   sessionStorage.removeItem(SESSION_KEY)
 }
 
-export function updateThought(id: string, updates: Partial<CapturedThought>): void {
+type MutableThoughtFields = Pick<CapturedThought, 'tags'>
+
+export function updateThought(id: string, updates: Partial<MutableThoughtFields>): void {
   if (typeof window === 'undefined') return
   const thoughts = getThoughts()
   const idx = thoughts.findIndex(t => t.id === id)
