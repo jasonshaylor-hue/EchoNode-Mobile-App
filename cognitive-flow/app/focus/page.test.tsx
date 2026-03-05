@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 vi.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+    button: ({ children, whileTap, whileHover, initial, animate, exit, transition, variants, ...props }: any) => <button {...props}>{children}</button>,
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
@@ -39,6 +39,11 @@ beforeEach(() => {
     }
     return Promise.resolve({ ok: true, json: async () => ({ tasks: [mockOpenTask] }) })
   })
+})
+
+afterEach(() => {
+  sessionStorage.clear()
+  vi.restoreAllMocks()
 })
 
 import FocusPage from '@/app/focus/page'

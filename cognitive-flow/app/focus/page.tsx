@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import TaskCard from '@/components/ui/adhd-optimized/TaskCard'
 import SwipeableTaskCard from '@/components/ui/adhd-optimized/SwipeableTaskCard'
@@ -25,6 +25,7 @@ export default function FocusPage() {
   const [isLoadingNext, setIsLoadingNext] = useState(false)
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const completedLoadedRef = useRef(false)
 
   useEffect(() => {
     const sessionId = getSessionId()
@@ -47,6 +48,7 @@ export default function FocusPage() {
       const res = await fetch(`/api/completed-tasks?sessionId=${sessionId}`)
       const data = await res.json()
       setCompletedTasks(data.tasks ?? [])
+      completedLoadedRef.current = true
     } catch {
       setError('Could not load completed tasks.')
     } finally {
@@ -56,7 +58,7 @@ export default function FocusPage() {
 
   const handleTabChange = useCallback((tab: View) => {
     setView(tab)
-    if (tab === 'completed') loadCompletedTasks()
+    if (tab === 'completed' && !completedLoadedRef.current) loadCompletedTasks()
   }, [loadCompletedTasks])
 
   const handleComplete = useCallback(async (taskId: string) => {
