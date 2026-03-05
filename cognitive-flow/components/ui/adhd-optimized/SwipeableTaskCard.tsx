@@ -30,6 +30,8 @@ export default function SwipeableTaskCard({ task, onComplete, onDelete }: Swipea
       <motion.div
         style={{ opacity: deleteOpacity }}
         role="presentation"
+        aria-hidden="true"
+        data-testid="delete-background"
         className="absolute inset-0 bg-red-500/80 flex items-center justify-end pr-5 rounded-2xl"
       >
         <motion.div style={{ scale: deleteScale }}>

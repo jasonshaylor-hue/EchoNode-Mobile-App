@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 
 let capturedDragEnd: ((_: unknown, info: { offset: { x: number } }) => void) | undefined
@@ -35,6 +35,10 @@ const mockTask: Task = {
 }
 
 describe('SwipeableTaskCard', () => {
+  beforeEach(() => {
+    capturedDragEnd = undefined
+  })
+
   it('renders the task card', () => {
     render(<SwipeableTaskCard task={mockTask} onComplete={vi.fn()} onDelete={vi.fn()} />)
     expect(screen.getByTestId('task-card')).toBeInTheDocument()
@@ -42,12 +46,11 @@ describe('SwipeableTaskCard', () => {
 
   it('renders the delete background layer', () => {
     render(<SwipeableTaskCard task={mockTask} onComplete={vi.fn()} onDelete={vi.fn()} />)
-    expect(screen.getByRole('presentation')).toBeInTheDocument()
+    expect(screen.getByTestId('delete-background')).toBeInTheDocument()
   })
 
   it('calls onDelete when drag ends past threshold (-80px)', () => {
     const onDelete = vi.fn()
-    capturedDragEnd = undefined
     render(<SwipeableTaskCard task={mockTask} onComplete={vi.fn()} onDelete={onDelete} />)
     act(() => capturedDragEnd?.({}, { offset: { x: -100 } }))
     expect(onDelete).toHaveBeenCalledWith('task-1')
@@ -55,7 +58,6 @@ describe('SwipeableTaskCard', () => {
 
   it('does NOT call onDelete when drag ends before threshold', () => {
     const onDelete = vi.fn()
-    capturedDragEnd = undefined
     render(<SwipeableTaskCard task={mockTask} onComplete={vi.fn()} onDelete={onDelete} />)
     act(() => capturedDragEnd?.({}, { offset: { x: -20 } }))
     expect(onDelete).not.toHaveBeenCalled()
