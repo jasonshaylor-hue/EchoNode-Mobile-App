@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { groq, FAST_MODEL } from '@/lib/groq'
 import type { ThoughtCategory } from '@/types/thought'
 
-const MAX_RETRIES = 2
+const MAX_ATTEMPTS = 3
 
 // z.ZodType<any> is required here — TypeScript cannot infer circular types from z.lazy()
 const ProjectNodeSchema: z.ZodType<any> = z.lazy(() =>
@@ -59,7 +59,7 @@ export async function organizeAgent(cleanedText: string, category: ThoughtCatego
   let lastResult: z.infer<typeof OrganizeSchema> | null = null
   let feedback = ''
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const prompt =
       attempt === 0
         ? basePrompt
@@ -80,8 +80,14 @@ Rules:
       prompt,
     })
 
-    const json = JSON.parse(text.trim().replace(/^```(?:json)?\n?|```$/g, ''))
-    lastResult = OrganizeSchema.parse(json)
+    let parsed: z.infer<typeof OrganizeSchema>
+    try {
+      const json = JSON.parse(text.trim().replace(/^```(?:json)?\n?|```$/g, ''))
+      parsed = OrganizeSchema.parse(json)
+    } catch {
+      continue
+    }
+    lastResult = parsed
 
     const evaluation = await evaluateHierarchy(lastResult.hierarchy, cleanedText, category)
     if (evaluation.pass) return lastResult
@@ -89,5 +95,6 @@ Rules:
     feedback = evaluation.feedback
   }
 
-  return lastResult!
+  if (lastResult === null) throw new Error('organizeAgent failed to produce a valid hierarchy')
+  return lastResult
 }
