@@ -45,8 +45,12 @@ If any fail, set pass: false and list specific issues in feedback.`,
     prompt: `Category: ${category}\nOriginal thought: "${cleanedText}"\nHierarchy: ${JSON.stringify(hierarchy)}`,
   })
 
-  const json = JSON.parse(text.trim().replace(/^```json\n?|```$/g, ''))
-  return EvalSchema.parse(json)
+  try {
+    const json = JSON.parse(text.trim().replace(/^```(?:json)?\n?|```$/g, ''))
+    return EvalSchema.parse(json)
+  } catch {
+    return { pass: false, feedback: 'Evaluation parse error' }
+  }
 }
 
 export async function organizeAgent(cleanedText: string, category: ThoughtCategory) {
@@ -76,7 +80,7 @@ Rules:
       prompt,
     })
 
-    const json = JSON.parse(text.trim().replace(/^```json\n?|```$/g, ''))
+    const json = JSON.parse(text.trim().replace(/^```(?:json)?\n?|```$/g, ''))
     lastResult = OrganizeSchema.parse(json)
 
     const evaluation = await evaluateHierarchy(lastResult.hierarchy, cleanedText, category)
