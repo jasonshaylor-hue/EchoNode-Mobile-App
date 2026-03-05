@@ -55,6 +55,28 @@ export async function completeTask(taskId: string): Promise<void> {
   }
 }
 
+export async function deleteTask(taskId: string): Promise<void> {
+  const { error } = await (supabase.from('tasks') as any)
+    .delete()
+    .eq('id', taskId)
+
+  if (error) {
+    console.error('[supabase] delete task failed:', error.message)
+    throw error
+  }
+}
+
+export async function getCompletedTasks(sessionId: string): Promise<Task[]> {
+  const { data, error } = await (supabase.from('tasks') as any)
+    .select('*')
+    .eq('session_id', sessionId)
+    .eq('status', 'done')
+    .order('completed_at', { ascending: false })
+
+  if (error || !data) return []
+  return data.map(dbToTask)
+}
+
 export async function getDailyFocusTasks(
   sessionId: string,
   date: string

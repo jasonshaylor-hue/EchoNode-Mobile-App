@@ -10,6 +10,7 @@ const mockEq = vi.hoisted(() => vi.fn())
 const mockIlike = vi.hoisted(() => vi.fn())
 const mockLimit = vi.hoisted(() => vi.fn())
 const mockOrder = vi.hoisted(() => vi.fn())
+const mockDelete = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -18,6 +19,7 @@ vi.mock('@/lib/supabase', () => ({
       insert: mockInsert,
       update: mockUpdate,
       upsert: mockUpsert,
+      delete: mockDelete,
     })),
   },
 }))
@@ -68,5 +70,48 @@ describe('completeTask', () => {
     mockUpdate.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: { message: 'fail' } }) })
     const { completeTask } = await import('@/memory/tasks')
     await expect(completeTask('task1')).rejects.toBeDefined()
+  })
+})
+
+describe('deleteTask', () => {
+  it('calls supabase delete with the given id', async () => {
+    const mockDeleteEq = vi.fn().mockResolvedValue({ error: null })
+    mockDelete.mockReturnValue({ eq: mockDeleteEq })
+    const { deleteTask } = await import('@/memory/tasks')
+    await deleteTask('task-xyz')
+    expect(mockDelete).toHaveBeenCalled()
+    expect(mockDeleteEq).toHaveBeenCalledWith('id', 'task-xyz')
+  })
+
+  it('throws when supabase returns an error', async () => {
+    const mockDeleteEq = vi.fn().mockResolvedValue({ error: { message: 'fail' } })
+    mockDelete.mockReturnValue({ eq: mockDeleteEq })
+    const { deleteTask } = await import('@/memory/tasks')
+    await expect(deleteTask('task-xyz')).rejects.toBeDefined()
+  })
+})
+
+describe('getCompletedTasks', () => {
+  it('returns mapped tasks when status is done', async () => {
+    setupChain({
+      data: [{
+        id: 't1', session_id: 'sess1', thought_id: 'th1',
+        title: 'Done task', priority: 'low', status: 'done',
+        mention_count: 1, created_at: '2026-01-01T00:00:00Z', completed_at: '2026-01-02T00:00:00Z',
+      }],
+      error: null,
+    })
+    const { getCompletedTasks } = await import('@/memory/tasks')
+    const result = await getCompletedTasks('sess1')
+    expect(result).toHaveLength(1)
+    expect(result[0].title).toBe('Done task')
+    expect(result[0].status).toBe('done')
+  })
+
+  it('returns empty array on error', async () => {
+    setupChain({ data: null, error: { message: 'fail' } })
+    const { getCompletedTasks } = await import('@/memory/tasks')
+    const result = await getCompletedTasks('sess1')
+    expect(result).toEqual([])
   })
 })
