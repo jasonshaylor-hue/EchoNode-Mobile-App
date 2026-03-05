@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 vi.mock('framer-motion', () => ({
   motion: {
@@ -49,15 +49,17 @@ afterEach(() => {
 import FocusPage from '@/app/focus/page'
 
 describe('FocusPage', () => {
-  it('renders the Active/Completed tab toggle', () => {
+  it('renders the Active/Completed tab toggle', async () => {
     render(<FocusPage />)
     expect(screen.getByRole('button', { name: /active/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /completed/i })).toBeInTheDocument()
+    await act(async () => {})
   })
 
-  it('renders the What do I do next button', () => {
+  it('renders the What do I do next button', async () => {
     render(<FocusPage />)
     expect(screen.getByRole('button', { name: /what do i do next/i })).toBeInTheDocument()
+    await act(async () => {})
   })
 
   it('shows swipeable cards in Active tab after loading', async () => {

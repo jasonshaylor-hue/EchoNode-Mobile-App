@@ -26,6 +26,11 @@ export default function FocusPage() {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const completedLoadedRef = useRef(false)
+  const focusTasksRef = useRef<Task[]>([])
+  const allTasksRef = useRef<Task[]>([])
+
+  useEffect(() => { focusTasksRef.current = focusTasks }, [focusTasks])
+  useEffect(() => { allTasksRef.current = allTasks }, [allTasks])
 
   useEffect(() => {
     const sessionId = getSessionId()
@@ -62,7 +67,7 @@ export default function FocusPage() {
   }, [loadCompletedTasks])
 
   const handleComplete = useCallback(async (taskId: string) => {
-    const completed = [...focusTasks, ...allTasks].find(t => t.id === taskId)
+    const completed = [...focusTasksRef.current, ...allTasksRef.current].find(t => t.id === taskId)
     setFocusTasks(prev => prev.filter(t => t.id !== taskId))
     setAllTasks(prev => prev.filter(t => t.id !== taskId))
     setNextTaskResult(prev => prev?.task?.id === taskId ? null : prev)
@@ -82,7 +87,7 @@ export default function FocusPage() {
     } catch {
       setError("Couldn't save — tap to retry")
     }
-  }, [focusTasks, allTasks])
+  }, [])  // empty deps — reads tasks via refs, writes via functional updaters
 
   const handleDelete = useCallback(async (taskId: string) => {
     setFocusTasks(prev => prev.filter(t => t.id !== taskId))
