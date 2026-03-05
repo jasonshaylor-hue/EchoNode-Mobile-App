@@ -46,3 +46,21 @@ describe('TaskCard', () => {
     expect(onComplete).toHaveBeenCalledWith('task-1')
   })
 })
+
+describe('completed state', () => {
+  it('shows checkmark icon when completed', () => {
+    render(<TaskCard task={mockTask} onComplete={vi.fn()} completed />)
+    expect(screen.getByText('✓')).toBeInTheDocument()
+  })
+
+  it('does not render checkbox button when completed', () => {
+    render(<TaskCard task={mockTask} onComplete={vi.fn()} completed />)
+    expect(screen.queryByRole('button', { name: /Mark.*as done/i })).not.toBeInTheDocument()
+  })
+
+  it('renders task title with line-through when completed', () => {
+    render(<TaskCard task={mockTask} onComplete={vi.fn()} completed />)
+    const title = screen.getByText('Write tests for new feature')
+    expect(title).toHaveClass('line-through')
+  })
+})
