@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 vi.mock('framer-motion', () => ({
   motion: {
@@ -8,21 +8,61 @@ vi.mock('framer-motion', () => ({
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
+
 vi.mock('@/components/ui/adhd-optimized/TaskCard', () => ({
-  default: ({ task }: any) => <div data-testid="task-card">{task.title}</div>,
+  default: ({ task, completed }: any) => (
+    <div data-testid={completed ? 'completed-card' : 'task-card'}>{task.title}</div>
+  ),
 }))
 
-// Mock fetch globally
-global.fetch = vi.fn().mockResolvedValue({
-  ok: true,
-  json: async () => ({ tasks: [] }),
+vi.mock('@/components/ui/adhd-optimized/SwipeableTaskCard', () => ({
+  default: ({ task }: any) => <div data-testid="swipeable-card">{task.title}</div>,
+}))
+
+const mockOpenTask = {
+  id: 'task-1', title: 'Open task', priority: 'high',
+  status: 'open', mentionCount: 1, sessionId: 'sess', thoughtId: 'th1',
+  createdAt: new Date().toISOString(),
+}
+
+const mockDoneTask = {
+  id: 'task-2', title: 'Done task', priority: 'low',
+  status: 'done', mentionCount: 1, sessionId: 'sess', thoughtId: 'th1',
+  createdAt: new Date().toISOString(), completedAt: new Date().toISOString(),
+}
+
+beforeEach(() => {
+  sessionStorage.setItem('cf_session_id', 'test-session')
+  global.fetch = vi.fn().mockImplementation((url: string) => {
+    if (url.includes('completed-tasks')) {
+      return Promise.resolve({ ok: true, json: async () => ({ tasks: [mockDoneTask] }) })
+    }
+    return Promise.resolve({ ok: true, json: async () => ({ tasks: [mockOpenTask] }) })
+  })
 })
 
 import FocusPage from '@/app/focus/page'
 
 describe('FocusPage', () => {
+  it('renders the Active/Completed tab toggle', () => {
+    render(<FocusPage />)
+    expect(screen.getByRole('button', { name: /active/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /completed/i })).toBeInTheDocument()
+  })
+
   it('renders the What do I do next button', () => {
     render(<FocusPage />)
     expect(screen.getByRole('button', { name: /what do i do next/i })).toBeInTheDocument()
+  })
+
+  it('shows swipeable cards in Active tab after loading', async () => {
+    render(<FocusPage />)
+    await waitFor(() => expect(screen.queryAllByTestId('swipeable-card').length).toBeGreaterThan(0))
+  })
+
+  it('switches to Completed tab and shows completed tasks', async () => {
+    render(<FocusPage />)
+    fireEvent.click(screen.getByRole('button', { name: /completed/i }))
+    await waitFor(() => expect(screen.queryAllByTestId('completed-card').length).toBeGreaterThan(0))
   })
 })
