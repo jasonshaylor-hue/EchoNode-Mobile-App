@@ -10,91 +10,109 @@ interface VoiceCaptureProps {
 
 export default function VoiceCapture({ onCapture, isProcessing }: VoiceCaptureProps) {
   const [isListening, setIsListening] = useState(false)
-  const [hasSpeechSupport, setHasSpeechSupport] = useState(true)
+  const [hasSpeechSupport, setHasSpeechSupport] = useState(false)
   const [textInput, setTextInput] = useState('')
+  const [speechError, setSpeechError] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      setHasSpeechSupport(false)
-      return
-    }
+    if (!SpeechRecognition) return
+
+    setHasSpeechSupport(true)
     const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = false
     recognition.lang = 'en-US'
+
     recognition.onresult = (e: any) => {
       const transcript = e.results[0][0].transcript
-      onCapture(transcript)
+      setTextInput(transcript)
       setIsListening(false)
+      setSpeechError(null)
     }
-    recognition.onerror = () => setIsListening(false)
+
+    recognition.onerror = (e: any) => {
+      setIsListening(false)
+      if (e.error === 'not-allowed') {
+        setSpeechError('Microphone access denied — type instead')
+      } else if (e.error === 'no-speech') {
+        setSpeechError('No speech detected — try again')
+      } else {
+        setSpeechError('Speech capture failed — type instead')
+      }
+    }
+
     recognition.onend = () => setIsListening(false)
     recognitionRef.current = recognition
+
     return () => {
       recognition.abort()
       recognitionRef.current = null
     }
-  }, [onCapture])
+  }, [])
 
   const handleMicPress = useCallback(() => {
     if (!recognitionRef.current || isProcessing) return
+    setSpeechError(null)
     if (isListening) {
       recognitionRef.current.stop()
     } else {
       setIsListening(true)
-      recognitionRef.current.start()
+      try {
+        recognitionRef.current.start()
+      } catch {
+        setIsListening(false)
+        setSpeechError('Speech capture failed — type instead')
+      }
     }
   }, [isListening, isProcessing])
 
-  const handleTextSubmit = useCallback(() => {
-    if (!textInput.trim()) return
+  const handleSubmit = useCallback(() => {
+    if (!textInput.trim() || isProcessing) return
     onCapture(textInput.trim())
     setTextInput('')
-  }, [textInput, onCapture])
-
-  if (!hasSpeechSupport) {
-    return (
-      <div className="w-full px-4 pb-[env(safe-area-inset-bottom)]">
-        <textarea
-          className="w-full min-h-[120px] bg-surface border border-border rounded-xl p-4 text-primary placeholder:text-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent"
-          placeholder="What's on your mind?"
-          value={textInput}
-          onChange={(e) => setTextInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleTextSubmit())}
-          aria-label="Type your thought"
-        />
-        <button
-          onClick={handleTextSubmit}
-          disabled={isProcessing || !textInput.trim()}
-          className="mt-2 w-full min-h-[48px] bg-accent text-white rounded-xl font-medium disabled:opacity-40"
-        >
-          {isProcessing ? 'Processing...' : 'Capture Thought'}
-        </button>
-      </div>
-    )
-  }
+  }, [textInput, isProcessing, onCapture])
 
   return (
-    <div className="flex flex-col items-center gap-3 pb-[env(safe-area-inset-bottom)] px-4">
-      <motion.button
-        onPointerDown={handleMicPress}
-        disabled={isProcessing}
-        animate={{ opacity: isProcessing ? [0.6, 1] : isListening ? [0.7, 1] : 1 }}
-        transition={{ repeat: isProcessing || isListening ? Infinity : 0, duration: 1 }}
-        className="min-h-[56px] min-w-[56px] w-20 h-20 rounded-full bg-accent flex items-center justify-center disabled:opacity-40 focus:outline-none focus:ring-4 focus:ring-accent/50"
-        aria-label={isProcessing ? 'Processing...' : isListening ? 'Listening — tap to stop' : 'Hold to Speak'}
-        aria-pressed={isListening}
+    <div className="w-full px-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex gap-2 items-end">
+        <textarea
+          className="flex-1 min-h-[80px] bg-surface border border-border rounded-xl p-3 text-primary placeholder:text-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+          placeholder={isListening ? 'Listening...' : "What's on your mind?"}
+          value={textInput}
+          onChange={(e) => setTextInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSubmit())}
+          aria-label="Type your thought"
+          disabled={isProcessing}
+        />
+        {hasSpeechSupport && (
+          <motion.button
+            onPointerDown={handleMicPress}
+            disabled={isProcessing}
+            animate={{ opacity: isListening ? [0.7, 1] : 1 }}
+            transition={{ repeat: isListening ? Infinity : 0, duration: 1 }}
+            className="min-h-[48px] min-w-[48px] w-12 h-12 rounded-full bg-accent flex items-center justify-center disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-accent/50 flex-shrink-0"
+            aria-label={isListening ? 'Listening — tap to stop' : 'Tap to speak'}
+            aria-pressed={isListening}
+          >
+            <span className="text-xl" aria-hidden="true">
+              {isListening ? '🎙️' : '●'}
+            </span>
+          </motion.button>
+        )}
+      </div>
+      {speechError && (
+        <p className="text-sm text-red-400 mt-1" role="alert">{speechError}</p>
+      )}
+      <button
+        onClick={handleSubmit}
+        disabled={isProcessing || !textInput.trim()}
+        className="mt-2 w-full min-h-[48px] bg-accent text-white rounded-xl font-medium disabled:opacity-40"
       >
-        <span className="text-2xl" aria-hidden="true">
-          {isProcessing ? '⏳' : isListening ? '🎙️' : '●'}
-        </span>
-      </motion.button>
-      <p className="text-muted text-sm">
-        {isProcessing ? 'Processing...' : isListening ? 'Listening...' : "What's on your mind?"}
-      </p>
+        {isProcessing ? 'Processing...' : 'Capture Thought'}
+      </button>
     </div>
   )
 }
