@@ -1,0 +1,6 @@
+// Release build configuration
+// Replace placeholder values with your actual Supabase project credentials
+// DO NOT commit real keys — use environment variables or a secrets manager in CI
+
+SUPABASE_URL = https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY = eyJyour_anon_key_here
